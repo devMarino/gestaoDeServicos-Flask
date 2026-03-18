@@ -1,0 +1,25 @@
+# Ambiente Virtual (Crucial não enviar!)
+venv/
+.venv/
+env/
+.env/
+# Byte-compiled / Python (Arquivos gerados pelo Python ao rodar)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Configurações de Banco de Dados e Segredos
+.env
+instance/
+.pytest_cache/
+
+# IDEs (VS Code, PyCharm)
+.vscode/
+.idea/
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
