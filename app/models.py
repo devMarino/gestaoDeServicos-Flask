@@ -21,6 +21,7 @@ class Cliente(db.Model):
     senha = db.Column(db.String(128),nullable=False)
     data_cadastro = db.Column(db.Date, default=lambda: datetime.now(timezone.utc), nullable=False)
 
+    agendamentos = db.relationship('Agendamento', backref='cliente', lazy=True)
 class Funcionario(db.Model):
     __tablename__ = 'funcionarios'
     id = db.Column(db.Integer, primary_key=True)
