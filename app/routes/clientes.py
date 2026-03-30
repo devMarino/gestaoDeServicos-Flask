@@ -7,12 +7,28 @@ clientes_bp = Blueprint('clientes',__name__,url_prefix='/clientes')
 @clientes_bp.route('/', methods=['GET'])
 def get_all_client():
     try:
-        list_client = Cliente.query.all()
+        search_name = request.args.get('nome')
+        search_email = request.args.get('email')
+        search_telefone = request.args.get('telefone')
+
+        query = Cliente.query
+        # busca via Query Parameters
+        if search_name:
+            query = query.filter(Cliente.nome.ilike(f'%{search_name}%'))
+
+        if search_email:
+            query = query.filter(Cliente.email.ilike(f'%{search_email}%'))
+        
+        if search_telefone:
+            query = query.filter(Cliente.telefone.ilike(f'%{search_telefone}%'))
+
+        list_client = query.all()
 
         output = []
 
         for user in list_client:
             output.append({
+                'id': user.id,
                 'nome': user.nome,
                 'telefone': user.telefone,
                 'email': user.email,
