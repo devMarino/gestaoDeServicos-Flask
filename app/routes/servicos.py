@@ -7,7 +7,12 @@ servicos_bp = Blueprint('servicos', __name__,url_prefix='/servicos')
 @servicos_bp.route('/', methods=['GET'])
 def get_all_services():
     try:
-        list_services = Servico.query.all()
+        search_service = request.args.get('nome')
+
+        if search_service:
+            list_services = Servico.query.filter(Servico.nome.ilike(f'%{search_service}%')).all()
+        else:
+            list_services = Servico.query.all()
 
         output = []
 
@@ -31,7 +36,7 @@ def create_service():
         
         nome = data.get('nome')
         servico_nome = Servico.query.filter_by(nome=nome).first()
-        # evitar nome duplicado de serviço
+
         if servico_nome:
             return jsonify({'error': 'Serviço já cadastrado!'}), 409
         
@@ -42,10 +47,10 @@ def create_service():
         if not nome or not preco:
             return jsonify({'error': 'Preencha os campos de nome e preço'}), 400
         
-        # criando novo_serviço via construtor
+       
         novo_servico = Servico(nome=nome,preco=preco,duracao_estimada=duracao_estimada)
 
-        # add e salvando + mensagem de sucesso
+        
         db.session.add(novo_servico)
         db.session.commit()
         return jsonify({'message': 'serviço cadastrado com sucesso!'}), 201
@@ -102,4 +107,3 @@ def delete_specific_service(id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
     
-    # add id nos gets (esqueci) :( 
