@@ -24,11 +24,13 @@ class Cliente(db.Model):
     agendamentos = db.relationship('Agendamento', backref='cliente', lazy=True)
 class Funcionario(db.Model):
     __tablename__ = 'funcionarios'
+
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(200), nullable=False)
     especialidade = db.Column(db.String(500), nullable=True)
     status = db.Column(db.Enum(StatusFuncionario), default=StatusFuncionario.INATIVO, nullable=False)
 
+    agendamentos = db.relationship('Agendamento', backref='funcionario', lazy=True)
 class Agendamento(db.Model):
     __tablename__ = 'agendamentos'
     id = db.Column(db.Integer, primary_key=True)
@@ -37,6 +39,8 @@ class Agendamento(db.Model):
 
     cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
     funcionario_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id'), nullable=False)
+    # cascade serve para limpar os itens caso o agendamento seja cancelado, evitando itens em atendimentos_itens sem um agendamento(vazio)
+    itens_atendimento = db.relationship('AtendimentoItem', backref='agendamento', lazy=True, cascade="all, delete-orphan")
 
 class AtendimentoItem(db.Model):
     __tablename__ = 'atendimento_itens'
@@ -46,6 +50,7 @@ class AtendimentoItem(db.Model):
     agendamento_id = db.Column(db.Integer, db.ForeignKey('agendamentos.id'), nullable=False)
     servico_id = db.Column(db.Integer, db.ForeignKey('servicos.id'), nullable=False)
 
+    servico = db.relationship('Servico', lazy=True)
 class Servico(db.Model):
     __tablename__ = 'servicos'
     id = db.Column(db.Integer, primary_key=True)
