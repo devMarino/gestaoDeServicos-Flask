@@ -17,6 +17,9 @@ def create_app():
 
     from app import models
     
+    
+    
+    from app.routes.agendamentos import agendamentos_bp
     return app
 
 
