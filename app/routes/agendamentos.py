@@ -64,7 +64,7 @@ def create_schedule():
 
             if not servico_original:
                 db.session.rollback()
-                return jsonify({'error': f'Serviço ID: {item['id']} não encontrado'}), 404
+                return jsonify({'error': f"Serviço ID: {item['id']} não encontrado"}), 404
             
             novo_item = AtendimentoItem(
             agendamento_id=novo_agendamento.id,
