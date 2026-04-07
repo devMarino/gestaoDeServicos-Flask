@@ -37,14 +37,20 @@ class Agendamento(db.Model):
 
     cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
     funcionario_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id'), nullable=False)
+    # relação cliente e funcionario para atendimento
+    cliente = db.relationship('Cliente', backref='agendamentos')
+    funcionario = db.relationship('Funcionario', backref='agendamentos')
+    # relação dos Itens
+    itens_atendimento = db.relationship('AtendimentoItem', backref='agendamento', cascade="all, delete-orphan")
 
 class AtendimentoItem(db.Model):
     __tablename__ = 'atendimento_itens'
     id = db.Column(db.Integer, primary_key=True)
     valor_aplicado = db.Column(db.Numeric(10, 2), nullable=False)
-    
     agendamento_id = db.Column(db.Integer, db.ForeignKey('agendamentos.id'), nullable=False)
     servico_id = db.Column(db.Integer, db.ForeignKey('servicos.id'), nullable=False)
+    # relação do serviço para itens
+    servico = db.relationship('Servico', backref='itens_atendimento')
 
 class Servico(db.Model):
     __tablename__ = 'servicos'
