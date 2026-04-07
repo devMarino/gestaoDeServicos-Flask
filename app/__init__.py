@@ -17,9 +17,10 @@ def create_app():
 
     from app import models
     
-    
-    
     from app.routes.agendamentos import agendamentos_bp
+
+    from app.routes.funcionarios import funcionarios_bp
+    app.register_blueprint(funcionarios_bp)
     return app
 
 
