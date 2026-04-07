@@ -15,9 +15,11 @@ def create_app():
     migrate.init_app(app,db)
 
     from app.routes.clientes import clientes_bp
+    from app.routes.servicos import servicos_bp
     from app import models
 
     app.register_blueprint(clientes_bp)
+    app.register_blueprint(servicos_bp)
     
     from app.routes.agendamentos import agendamentos_bp
 
