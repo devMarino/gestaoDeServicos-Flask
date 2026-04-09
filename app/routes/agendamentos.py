@@ -3,7 +3,7 @@ from app import db
 from app.models import Agendamento,AtendimentoItem, Servico
 from datetime import datetime
 
-agendamentos_bp = Blueprint('agendamentos',__name__,url_prefix='/agendamentos')
+agendamentos_bp = Blueprint('agendamentos',__name__)
 
 @agendamentos_bp.route('/', methods=['GET'])
 def get_schedules():

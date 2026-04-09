@@ -2,7 +2,7 @@ from flask import Blueprint,jsonify,request
 from app import db
 from app.models import Funcionario, StatusFuncionario
 
-funcionarios_bp = Blueprint('funcionarios',__name__,url_prefix='/funcionarios')
+funcionarios_bp = Blueprint('funcionarios',__name__)
 
 @funcionarios_bp.route('/', methods=['GET'])
 def get_employees():

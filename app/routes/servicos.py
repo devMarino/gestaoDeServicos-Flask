@@ -2,7 +2,7 @@ from flask import Blueprint, request,jsonify
 from app import db
 from app.models import Servico
 
-servicos_bp = Blueprint('servicos', __name__,url_prefix='/servicos')
+servicos_bp = Blueprint('servicos', __name__)
 
 @servicos_bp.route('/', methods=['GET'])
 def get_all_services():
