@@ -9,10 +9,14 @@ agendamentos_bp = Blueprint('agendamentos',__name__)
 def get_schedules():
     try:
         hoje = datetime.now().date()
-        list_agendamentos = Agendamento.query.filter(db.func.date(Agendamento.data_hora) == hoje).all()
+        # agendamentos de hoje
+        list_agendamentos_result = Agendamento.query.filter(db.func.date(Agendamento.data_hora) == hoje).all()
+        # se não tiver agendamentos de hoje, buscva todos
+        if not list_agendamentos_result:
+            list_agendamentos_result = Agendamento.query.all()
         output = []
-        
-        for agendamento in list_agendamentos:
+            
+        for agendamento in list_agendamentos_result:
             #pega o agendamento completo + serviços  
             dados = {
                 'id': agendamento.id,
@@ -21,16 +25,16 @@ def get_schedules():
                 'funcionario_id': agendamento.funcionario_id,
                 'status': agendamento.status.value,
                 'servicos': []
-            }
-            
-            #pega serviço de cada atendimento da tabela
+                }
+                
+                #pega serviço de cada atendimento da tabela
             for item in agendamento.itens_atendimento:
                 dados['servicos'].append({
                     'nome': item.servico.nome,
                     'valor': str(item.valor_aplicado)
-                })
-                
-            output.append(dados)
+                    })
+                    
+                output.append(dados)
         return jsonify(output), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
