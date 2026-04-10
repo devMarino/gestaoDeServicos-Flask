@@ -129,13 +129,12 @@ def update_full_schedule(id):
             except KeyError:
                 return jsonify({'error': 'Status inválido'}), 400
 
-        # Atualizando Serviços
+        # removendo itens antigos
         if 'servicos' in data:
-            # 1. Remove os itens antigos (O cascade cuida do banco, mas aqui limpamos a relação)
             for item in agendamento.itens_atendimento[:]: 
                 db.session.delete(item)
             
-            # 2. Adiciona os novos
+            #adiciona os novos itens
             for item_data in data['servicos']:
                 servico = Servico.query.get(item_data['id'])
                 if servico:
