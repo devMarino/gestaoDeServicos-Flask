@@ -1,6 +1,6 @@
 from flask import Blueprint,request,jsonify
 from app import db
-from app.models import Agendamento,AtendimentoItem, Servico
+from app.models import Agendamento,AtendimentoItem,Servico, StatusAgendamento
 from datetime import datetime
 
 agendamentos_bp = Blueprint('agendamentos',__name__,url_prefix='/agendamentos')
@@ -81,24 +81,24 @@ def create_schedule():
     
 @agendamentos_bp.route('/<int:id>/status', methods=['PATCH'])
 def update_status(id):
-    try:
-        agendamento = Agendamento.query.get_or_404(id)
-        data = request.get_json()
-        
-        # O status = PENDENTE|CONCLUIDO|CANCELADO|AUSENTE
-        novo_status = data.get('status').upper()
+    agendamento = Agendamento.query.get_or_404(id)
+    data = request.get_json()
 
-        if not novo_status:
-            db.session.rollback()
-            return jsonify({'error': 'status não informado'}), 400
-        
-        agendamento.status = novo_status
+    status_input = data.get('status')
+    if not status_input:
+        return jsonify({'error': 'Campo status é obrigatório'}), 400
+
+    try:
+        agendamento.status = StatusAgendamento[status_input.upper()]
         db.session.commit()
 
-        return jsonify({'message': f'Status do agendamento {id} atualizado para {novo_status}'})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': 'status inválido ou erro do servidor'}), 400
+        return jsonify({
+            'message': 'Status atualizado',
+            'novo_status': agendamento.status.value
+        }), 200
+    except KeyError:
+        opcoes = [status.name for status in StatusAgendamento]
+        return jsonify({'error': f'Status inválido. Escolha entre: {opcoes}'}), 400
     
 @agendamentos_bp.route('/<int:id>', methods=['DELETE'])
 def delete_schedule(id):
@@ -107,6 +107,48 @@ def delete_schedule(id):
         db.session.delete(agendamento)
         db.session.commit()
         return jsonify({'message': f'Agendamento {id} e seus itens foram removidos com sucesso'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+    
+@agendamentos_bp.route('/<int:id>', methods=['PUT'])
+def update_full_schedule(id):
+    try:
+        agendamento = Agendamento.query.get_or_404(id)
+        data = request.get_json()
+
+        if 'data_hora' in data:
+            agendamento.data_hora = datetime.strptime(data['data_hora'], '%Y-%m-%d %H:%M:%S')
+
+        if 'funcionario_id' in data:
+            agendamento.funcionario_id = data['funcionario_id']
+
+        if 'status' in data:
+            try:
+                agendamento.status = StatusAgendamento[data['status'].upper()]
+            except KeyError:
+                return jsonify({'error': 'Status inválido'}), 400
+
+        # Atualizando Serviços
+        if 'servicos' in data:
+            # 1. Remove os itens antigos (O cascade cuida do banco, mas aqui limpamos a relação)
+            for item in agendamento.itens_atendimento[:]: 
+                db.session.delete(item)
+            
+            # 2. Adiciona os novos
+            for item_data in data['servicos']:
+                servico = Servico.query.get(item_data['id'])
+                if servico:
+                    novo_item = AtendimentoItem(
+                        agendamento=agendamento,
+                        servico=servico,
+                        valor_aplicado=servico.preco
+                    )
+                    db.session.add(novo_item)
+
+        db.session.commit()
+        return jsonify({'message': 'Agendamento atualizado com sucesso'}), 200
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
